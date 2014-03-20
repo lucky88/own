@@ -1,0 +1,7 @@
+name = Ajax Register Override
+description = Overrides Ajax Register Module to add new Features
+package = Drupal Custom
+core = 7.x
+
+dependencies[] = ctools
+dependencies[] = ajax_register

@@ -1,0 +1,25 @@
+/**
+ * This file should get overwritten if Method 1 is used. If Method 2 is chosen,
+ * remove this comment and start adding your styles to this file.
+ */
+
+/** Common Overrides **/
+ul,ol {list-style: none;padding: 0;}
+
+/** Form Error Overrides **/
+div.error, table tr.error {background: none;}
+
+/** Alert Massage Overrides **/
+.alert-danger {color: #a94442;background-color: #ebccd1;border-color: #ebccd1;}
+.alert a, .alert .alert-link {font-weight: normal;color: #a94442;text-decoration: none;}
+
+/** Ajax Register Overrides **/
+.ajax-register-links li {float: left;margin: 0 5px 0 0px;padding: 0;}
+.ajax-register-links-wrapper {width: 100%;height: 25px;}
+.ajax-register-links-wrapper .ajax-register-links li a {border:none;}
+.ajax-register-links-wrapper .ajax-register-links li {padding: 0;}
+
+/** Navigation + Nav Ajax Register Link Overrides **/
+#navbar a {color: #fff;}
+#navbar .block-ajax-register {float: right;}
+#navbar .ajax-register-links li {margin: 13px;}

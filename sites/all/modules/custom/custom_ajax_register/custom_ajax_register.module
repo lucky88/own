@@ -1,0 +1,170 @@
+<?php
+
+//function custom_ajax_register_menu() {
+//
+//  $items['ajax_register/%/%/%ctools_js'] = array(
+//    'page callback' => 'ajax_register_page_callback',
+//    'page arguments' => array(2, 3),
+//    'access callback' => 'ajax_register_page_access',
+//    'access arguments' => array(2, 3),
+//    'delivery callback' => 'ajax_deliver',
+//    'theme callback' => 'ajax_base_page_theme',
+//    'type' => MENU_CALLBACK,
+//    'file' => 'ajax_register.pages.inc',
+//  );
+//  return $items;
+//}
+
+function custom_ajax_register_module_implements_alter(&$module_list, $context) {
+    if ($context === "form_alter") {
+
+        $temp = $module_list['custom_ajax_register'];
+        // Removing the drupal_custom &  ajax_register key/value
+        unset($module_list['custom_ajax_register']);
+        unset($module_list['ajax_register']);
+
+        // Adding the mymodule key value as the last member in the list
+        $module_list['custom_ajax_register'] = $temp;
+    }
+}
+
+function custom_ajax_register_form_alter(&$form, &$form_state, $form_id) {
+
+    // Create array with enabled ajax links.
+    $enabled_links = array('login', 'register', 'password');
+
+    switch ($form_id) {
+        case 'user_login_block':
+
+            // Include css and js for modal dialog.
+            drupal_custom_ajax_register_include_modal();
+
+            // Add links processed with CTools modal.
+            $form['links'] = array(
+                '#theme' => 'item_list',
+                '#items' => custom_ajax_register_ajax_links($enabled_links, $form_id),
+                '#attributes' => array('class' => array('ajax-register-links')),
+            );
+
+            // Add html wrapper to form and #ajax to form submit.
+            _ajax_register_add_ajax($form, $form_id);
+
+            // Do not add to the user login block anything more.
+            break;
+
+        case 'user_login':
+        case 'user_pass':
+        case 'user_register_form':
+
+            // Do not process form with AJAX that should be processed with CTools modal.
+            $modal_links_enabled = variable_get('ajax_register_form_enable_modal_links', TRUE);
+            if (!empty($form_state['ajax'])) {
+
+                // Include css and js for modal dialog.
+                drupal_custom_ajax_register_include_modal();
+
+                // Add links processed with CTools modal.
+                if ($modal_links_enabled) {
+                    $form['links'] = array(
+                        '#theme' => 'item_list',
+                        '#items' => custom_ajax_register_ajax_links($enabled_links, $form_id),
+                        '#attributes' => array('class' => array('ajax-register-links', 'inline')),
+                        '#weight' => 200,
+                        '#prefix' => '<div class="ajax-register-links-wrapper">',
+                        '#suffix' => '</div>',
+                    );
+                }
+
+                // Unset captcha from modal form.
+                $hide_captcha = variable_get('ajax_register_hide_captcha', FALSE);
+                if ($hide_captcha) {
+                    unset($form['captcha']);
+                }
+            } else {
+                // Add html wrapper to form and #ajax to form submit.
+                _ajax_register_add_ajax($form, $form_id);
+            }
+    }
+}
+
+function custom_ajax_register_ajax_links($links_enabled, $form_id) {
+    $links = array();
+
+    // Build classes for ajax modal link.
+    $classes = array();
+    $classes[] = 'ctools-use-modal';
+    $classes[] = 'ctools-modal-ctools-ajax-register-style';
+    $classes[] = 'btn btn-primary';
+
+    // Provide default options for ajax modal link.
+    $options = array(
+        'attributes' => array(
+            'class' => $classes,
+            'rel' => 'nofollow',
+        )
+    );
+
+    // Add login button.
+    if (in_array('login', $links_enabled) && (stripos($form_id, 'user_login') === FALSE)) {
+        $options['attributes']['title'] = t('Login');
+        $links[] = l(t('Login'), 'ajax_register/login/nojs', $options);
+    }
+
+    // Add register button.
+    $user_registration_allowed = variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL);
+    if (in_array('register', $links_enabled) && $form_id != 'user_register_form' && $user_registration_allowed) {
+        $options['attributes']['title'] = t('Create new account');
+        $links[] = l(t('Create new account'), 'ajax_register/register/nojs', $options);
+    }
+
+    // Add request password button.
+    if (in_array('password', $links_enabled) && $form_id != 'user_pass') {
+        $options['attributes']['title'] = t('Request new password');
+        $links[] = l(t('Request new password'), 'ajax_register/password/nojs', $options);
+    }
+    
+    $options['attributes']['title'] = t('Rest Admin');
+    $links[] = l(t('Rest Admin'), 'ajax_register/restadmin/register/nojs', $options);
+    return $links;
+}
+
+function drupal_custom_ajax_register_include_modal() {
+
+    static $added = FALSE;
+    if ($added == FALSE) {
+
+        // Do not add css and scripts again.
+        $added = TRUE;
+
+        // Include the CTools tools that we need.
+        ctools_include('modal');
+        ctools_include('ajax');
+        ctools_modal_add_js();
+
+        // Create our own javascript that will be used to theme a modal.
+        $ajax_register_style = array(
+            'ctools-ajax-register-style' => array(
+                'modalSize' => array(
+                    'type' => 'fixed',
+                    'width' => (int) trim(variable_get('ajax_register_modal_width', 550)),
+                    'height' => 400,
+                    'contentRight' => 30,
+                    'contentBottom' => 0,
+                ),
+                'modalOptions' => array(
+                    'opacity' => (float) variable_get('ajax_register_modal_background_opacity', '0.8'),
+                    'background-color' => '#' . variable_get('ajax_register_modal_background_color', '000000'),
+                ),
+                'closeText' => '',
+                'throbber' => theme('image', array('path' => ctools_image_path('ajax-loader.gif', 'ajax_register'))),
+                'animation' => 'fadeIn',
+                'animationSpeed' => 'fast',
+            ),
+        );
+        drupal_add_js($ajax_register_style, 'setting');
+
+        // Add module css and js.
+        ctools_add_css('ajax-register', 'ajax_register');
+        ctools_add_js('ajax-register', 'ajax_register');
+    }
+}
