@@ -72,3 +72,7 @@ html > body li.views-fluid-grid-inline {
 .views-fluid-grid-item img{
     width: 300px;
 }
+
+.views-fluid-grid-item .views-field-field-image img{
+    height: 190px;
+}
