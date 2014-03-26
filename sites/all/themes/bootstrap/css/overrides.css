@@ -77,3 +77,6 @@ div.restaurants td img {
 body {
     background: url(../images/bg_img.jpg) !important;
 }
+.navbar {
+    background: linear-gradient(#4C5753, #6E0229 60%, #6E0229) repeat scroll 0 0 rgba(0, 0, 0, 0) !important;
+}
