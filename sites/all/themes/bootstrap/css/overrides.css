@@ -29,8 +29,8 @@ html.overlay-open .navbar-fixed-top{z-index:400}html.js fieldset.collapsed{heigh
 }
 
 .rest-tabs {
-     float: left;
-     width: 73% !important;
+    float: left;
+    width: 73% !important;
 }
 .user_logo{
     float: left;
@@ -53,25 +53,25 @@ html.overlay-open .navbar-fixed-top{z-index:400}html.js fieldset.collapsed{heigh
 
 div.restaurants td {
     background: #dadada;
-font-family: sans-serif;
-font-size: 13pt;
-border-radius: 22px;
-color: cadetblue;
-float: left;
-height: 276px;
-text-align: center;
-margin: 25px;
-border: none !important;
+    font-family: sans-serif;
+    font-size: 13pt;
+    border-radius: 22px;
+    color: cadetblue;
+    float: left;
+    height: 276px;
+    text-align: center;
+    margin: 25px;
+    border: none !important;
 }
 div.restaurants table {
-    
+
     border: none !important;
-    
+
 }
 div.restaurants td img {
-    
+
     height: 165px !important;
-    
+
 }
 
 body {
@@ -79,4 +79,29 @@ body {
 }
 .navbar {
     background: linear-gradient(#4C5753, #6E0229 60%, #6E0229) repeat scroll 0 0 rgba(0, 0, 0, 0) !important;
+}
+
+#rest_map{
+    width: 1201px;
+    height: 500px;
+    position: relative;
+    background-color: rgb(229, 227, 223);
+    overflow: hidden;
+    -webkit-transform: translateZ(0px);
+    position: fixed !important;
+    top: 165px;
+    z-index: 9;
+    border: 14px solid gray;
+    border-radius: 11px;
+
+}
+span.cross_btn{
+    background: url(../images/cross_btn.jpg) !important;
+    height: 30px;
+    position: absolute;
+    top: 52px;
+    width: 30px;
+    float: right;
+    z-index: 9999;
+    left: 1188px;
 }
