@@ -27,6 +27,11 @@ function rest_dash_menu() {
         'page arguments' => array('add_menu'),
         'access callback' => TRUE
     );
+    
+    $items['get_lat_long'] = array(
+        'page callback' => 'get_lat_long',
+        'access callback' => TRUE
+    );
 	
   
     return $items;
@@ -36,6 +41,10 @@ function rest_dash_theme() {
    $themes = array (
         'dashboard_template' => array(
             'template' => 'dashboard_template',
+            'arguments' => array(),
+        ),
+       'gmaps' => array(
+            'template' => 'gmaps',
             'arguments' => array(),
         ),
     );
@@ -53,107 +62,17 @@ function dashboard() {
     
 }
 
-function add_menu() {
-     global $user;
-     
-    $form = array();
-        
-    $form['#tree'] = TRUE;
-    $form['#attributes']['enctype'] = 'multipart/form-data';
-    $form['files_fieldset'] = array(
-          '#type' => 'fieldset',
-          '#title' => t('Upload Files'),
-    //wrapper set up so that ajax will replace elements within this wrapper.
-          '#prefix' => '<div id="files-fieldset-wrapper">',
-          '#suffix' => '</div>',
-  );
 
+function get_lat_long() {
+ 
+    $uid = $_POST['uid'];
+    $account = user_load($uid);
     
+    $profile_data = profile2_load_by_user($account);
+    
+    $return0 = new stdClass();
+    $return0->latitude = $profile_data['restaurant_admin']->field_location['und'][0]['latitude'];
+    $return0->longitude = $profile_data['restaurant_admin']->field_location['und'][0]['longitude'];
 
-  // Build the fieldset with the proper number of file upload. We'll use
-  // $form_state['num_files'] to determine the number of file fields to build.
-  if (empty($form_state['num_files'])) {
-    $form_state['num_files'] = 1;
-  }
-  for ($i = 0; $i < $form_state['num_files']; $i++) {
-      
-     $form['files_fieldset']['doc_desc'][$i] = array(
-           '#type' => 'textfield',
-           '#title' => t('Document description'),
-           '#description' => t('You are allow to upload jpg, jpeg, png and gif, 10MB Max Size'),
-    );
-      
-     $form['files_fieldset']['file'][$i] = array(
-           '#type' => 'file',
-           '#title' => t('Select Document'),
-           '#description' => t('You are allow to upload jpg, jpeg, png and gif, 10MB Max Size'),
-    );
-  }
-    $form['files_fieldset']['add_file'] = array(
-          '#type' => 'submit',
-          '#value' => t('Add one more'),
-          '#submit' => array('ajax_add_one_file_field'),
-          '#ajax' => array(
-            'callback' => 'ajax_add_more_filefield_callback',
-            'wrapper' => 'files-fieldset-wrapper',
-    ),
-  );
-  if ($form_state['num_files'] > 1) {
-     $form['files_fieldset']['remove_file'] = array(
-      '#type' => 'submit',
-      '#value' => t('Remove one'),
-      '#submit' => array('ajax_remove_one_file_field'),
-      '#ajax' => array(
-        'callback' => 'ajax_add_more_filefield_callback',
-        'wrapper' => 'files-fieldset-wrapper',
-      ),
-    );
-  }
-  
-   
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Submit'),
-  );
-return $form;
-}
-   
-
-/**
-* Callback for both ajax-enabled buttons.
-*
-* Selects and returns the fieldset with the file field in it.
-*/
-function ajax_add_more_filefield_callback($form, $form_state) {
-  return $form['files_fieldset'];
-}
-
-/**
-* Submit handler for the "add-one-more" button.
-*
-* Increments the max counter and causes a rebuild.
-*/
-function ajax_add_one_file_field($form, &$form_state) {
-  $form_state['num_files']++;
-  $form_state['rebuild'] = TRUE;
-}
-
-/**
-* Submit handler for the "remove one" button.
-*
-* Decrements the max counter and causes a form rebuild.
-*/
-function ajax_remove_one_file_field($form, &$form_state) {
-  if ($form_state['num_files'] > 1) {
-    $form_state['num_files']--;
-  }
-  $form_state['rebuild'] = TRUE;
-}
-
-/**
-* Final submit handler.
-*/
-function ajax_example_add_more_submit($form, &$form_state) {
-
-  drupal_set_message($output);
+    print json_encode($return0);exit;
 }
